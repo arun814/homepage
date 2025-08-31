@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Centered Search Bar</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: Arial, sans-serif;
+	  background-color:#e6ecfa;
+    }
+
+    .center-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 20vh;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .search-container {
+      width: 100%;
+      max-width: 400px;
+    }
+
+    input[type="search"] {
+      width: 100%;
+      padding: 0.75rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+	 input[type="search"]:focus,input[type="search"]:focus-visible,input[type="text"]:focus,input[type="text"]:focus-visible,textarea:focus,textarea:focus-visible {
+      box-shadow: 0px 0px 15px gray;
+      border: 0px;
+	  outline: unset;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+	 .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+	  margin:50px;
+	  padding-bottom:100px
+    }
+
+    .bookmark-card {
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      transition: box-shadow 0.2s ease;
+	  
+    }
+
+    .bookmark-card:hover,
+    .bookmark-card:focus-within {
+      box-shadow: 0px 0px 15px gray;
+    }
+
+    .bookmark-title {
+      font-size: 1.1rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+
+    .bookmark-description {
+      font-size: 0.95rem;
+      color: #555;
+      margin-bottom: 0.75rem;
+    }
+
+    .bookmark-link {
+      display: inline-block;
+      text-decoration: none;
+      color: #0078d4;
+      font-weight: bold;
+    }
+
+    .bookmark-link:focus {
+      outline: 2px solid #0078d4;
+      outline-offset: 2px;
+    }
+.button-container {
+  width: 300px;     /* Example width */
+  height: 100px;    /* Example height */
+  position: relative;
+}
+
+.full-button {
+  width: 100%;
+  height: 100%;
+  font-size: 1.5rem;
+  background-color: white;
+  color: black;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+}
+
+/* Modal container */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6);
+}
+
+.modal-content {
+  background: #fff;
+  margin: 5% auto;
+  padding: 20px;
+  width: 350px;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.close {
+  float: right;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+form label {
+  display: block;
+  margin-top: 10px;
+}
+
+form input, form textarea {
+  width: 100%;
+  padding: 8px;
+  margin-top: 4px;
+  box-sizing: border-box;
+}
+
+form button {
+  margin-top: 12px;
+  padding: 10px 15px;
+}
+
+.bookmark-card {
+  position: relative; /* Establish positioning context */
+  padding: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #fff;
+  max-width: 331px;
+}
+
+.bookmark-card .delete-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #888;
+}
+
+.bookmark-card .delete-btn:hover {
+  color: #e00; /* Optional: red on hover for clarity */
+}
+
+.card-grid-wrapper {
+  position: relative;
+  padding-top: 3rem; /* space for the button */
+}
+
+.top-bar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 1rem;
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.add-button {
+  background-color: white;
+  color: black;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-right:41px
+}
+
+.add-button:hover {
+   box-shadow: 0px 0px 15px gray;
+}
+
+
+  </style>
+  <script type="text/javascript">
+  
+
+
+  function DeleteCard(Wid) {
+  try {
+console.log(getCookie("weblinklistData"));
+   const Weblinks = JSON.parse(getCookie("weblinklistData"));
+  const updatedList = Weblinks.filter(item => item.wid !== Wid);
+  const jsonString = encodeURIComponent(JSON.stringify(updatedList));
+console.log(jsonString);
+
+// Set cookie with 5 years expiry
+document.cookie = `weblinklistData=${jsonString}; path=/; max-age=${1825 * 24 * 60 * 60}`;
+LoadWebCards();
+}
+catch (error) {
+  console.error("Invalid JSON:", error.message);
+}
+  }
+
+function getCookie(name) {
+  const cookies = document.cookie.split("; ");
+  for (let cookie of cookies) {
+    const [key, value] = cookie.split("=");
+    if (key === name) {
+      return decodeURIComponent(value);
+    }
+  }
+  return null;
+}
+/*
+const raw = getCookie("weblinklistData");
+const parsedData = raw ? JSON.parse(raw) : null;
+
+console.log(parsedData);*/
+window.addEventListener("load", function() {
+LoadWebCards();
+const searchinput = document.getElementById('searchBox');
+
+  searchinput.addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+      const query = searchinput.value.trim();
+      if (query) {
+        const encoded = encodeURIComponent(query);
+        window.location.href = `https://www.google.com/search?q=${encoded}`;
+      }
+    }
+  });
+});
+function openPopup() {
+  document.getElementById("popupForm").style.display = "block";
+}
+
+function closePopup() {
+  document.getElementById("popupForm").style.display = "none";
+}
+
+function LoadWebCards() {
+  try {
+//console.log(getCookie("weblinklistData"));
+
+var getcardcookei=getCookie("weblinklistData");
+
+if (getcardcookei==null){return;}
+   const Weblinks = JSON.parse(getCookie("weblinklistData"));
+   
+   console.log(3);
+   
+if (Weblinks==null){return;}
+
+  const list = document.getElementById("maindivweblinks");
+  document.getElementById("maindivweblinks").innerHTML = "";
+Weblinks.forEach((Weblink, index) => {
+  console.log(Weblink.Weblink);
+
+
+  const articleparent = document.createElement("article");
+      articleparent.className = "bookmark-card";
+      articleparent.setAttribute("role", "region");
+	  articleparent.setAttribute("aria-labelledby", "bm1-title"+index);
+	  
+	  const h2 = document.createElement("h2");
+	  h2.id="bm1-title"+index;
+      h2.className = "bookmark-title";
+      h2.textContent=Weblink.name;
+	  
+	  const p = document.createElement("p");
+	  p.id="bm1-detail"+index;
+      p.className = "bookmark-description";
+      p.textContent=Weblink.webdetail;
+	  
+	  
+	  const a = document.createElement("a");
+      a.href = Weblink.Weblink;
+      a.textContent = Weblink.Weblink;
+      a.className = "bookmark-link";
+      a.setAttribute("target", "_blank");
+      a.setAttribute("rel", "noopener noreferrer");
+	  
+	  const button = document.createElement("button");
+	 // button.id="bm1-title";
+      button.className = "delete-btn";
+      button.textContent='X';
+	  button.setAttribute("onclick", "DeleteCard("+Weblink.wid+")");
+	  
+articleparent.appendChild(h2);
+articleparent.appendChild(p);
+	  articleparent.appendChild(a);
+	   articleparent.appendChild(button);
+	  list.appendChild(articleparent);
+	  
+	  
+
+  
+});
+  // Use obj safely
+} catch (error) {
+  console.error("Invalid JSON:", error.message);
+}
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+  const form = document.getElementById("weblinkform");
+  if (form) {
+    form.addEventListener("submit", function(event) {
+      event.preventDefault();
+       // Collect form data
+  const name = document.getElementById("name").value.trim();
+  const Weblink = document.getElementById("Weblink").value.trim();
+  const webdetail = document.getElementById("webdetail").value.trim();
+
+  // Basic validation
+  if (!name || !Weblink || !webdetail) {
+    alert("Please fill in all fields.");
+    return;
+  }
+
+try {
+
+var getcardcookei=getCookie("weblinklistData");
+
+if (getcardcookei==null){
+const weblinklistData = {
+  wid:1,
+  name: name,
+  Weblink: ensureHttps(Weblink),
+  webdetail:webdetail,
+  preferences: {
+    theme: "blue",
+    accessibility: true
+  }
+};
+const jsonString = encodeURIComponent(JSON.stringify([weblinklistData]));
+
+// Set cookie with 5 years expiry
+document.cookie = `weblinklistData=${jsonString}; path=/; max-age=${1825 * 24 * 60 * 60}`;
+}
+else{   
+
+   const Weblinks = JSON.parse(getCookie("weblinklistData"));
+  // Use obj safely
+
+var varwid=Weblinks==null?0:Weblinks.length;
+  // Simulate submission (e.g., send to server)
+  console.log("Form submitted:", { name, Weblink, webdetail });
+  
+  const weblinklistData = {
+  wid:varwid+1,
+  name: name,
+  Weblink: ensureHttps(Weblink),
+  webdetail:webdetail,
+  preferences: {
+    theme: "blue",
+    accessibility: true
+  }
+};
+  if(Weblinks==null){
+  Weblinks=[weblinklistData];
+  }
+  else{
+  Weblinks.push(weblinklistData);
+  }
+const jsonString = encodeURIComponent(JSON.stringify(Weblinks));
+console.log(jsonString);
+
+// Set cookie with 5 years expiry
+document.cookie = `weblinklistData=${jsonString}; path=/; max-age=${1825 * 24 * 60 * 60}`;
+LoadWebCards();
+}
+
+  // Optionally reset form and close modal
+  this.reset();
+  closePopup(); // Assuming you have this function defined
+  } catch (error) {
+  console.error("Invalid JSON:", error.message);
+}
+    });
+  } else {
+    console.warn("Form element not found.");
+  }
+});
+function ensureHttps(url) {
+  if (!/^https?:\/\//i.test(url)) {
+    return 'https://' + url;
+  }
+  return url;
+}
+
+  </script>
+</head>
+<body>
+
+  <main  >
+  <div class="center-wrapper">
+    <div class="search-container" aria-label="Search section">
+      <label for="site-search">Search:</label>
+      <input type="search" id="searchBox" name="q" placeholder="Search on web..." />
+    </div>
+	</div>
+	<div class="card-grid-wrapper">
+
+	<div class="top-bar">
+    <button class="add-button"  onclick="openPopup()">+ Add</button>
+  </div>
+
+	<div id="maindivweblinks" class="card-grid" aria-label="Bookmark Cards">
+
+     
+	
+
+    </div>
+	  </div>
+	
+<!-- Popup Modal -->
+<div id="popupForm" class="modal" role="dialog" aria-modal="true" aria-labelledby="formTitle">
+  <div class="modal-content">
+    <span class="close" onclick="closePopup()" aria-label="Close">&times;</span>
+    <h2 id="formTitle">Add Weblink</h2>
+    <form id="weblinkform">
+      <label for="name">Name:</label>
+      <input type="text" id="name" name="name" required />
+
+      <label for="Weblink">Web Address:</label>
+      <input type="text" id="Weblink" name="Weblink" required />
+
+      <label for="webdetail">Detail:</label>
+      <textarea id="webdetail" name="webdetail" rows="4" required></textarea>
+
+      <button type="submit">Add</button>
+    </form>
+  </div>
+</div>
+
+
+  </main>
+
+</body>
+</html>
